@@ -42,12 +42,14 @@ def convert_array_from_dvidmsg(msg):
 
     return result
 
-def convert_array_to_dvidmsg(a, dvid_start):
+def convert_array_to_dvidmsg(a, dvid_start=None):
     msg = Array()
     msg.description = DatasetDescription(bounds=Bounds(), axisNames=[])
     msg.data = ArrayData()
-    msg.description.bounds.start = dvid_start
-    msg.description.bounds.stop = numpy.array(dvid_start) + a.shape
+    if dvid_start is None:
+        dvid_start = (0,) * len(a.shape)
+    msg.description.bounds.start = list(dvid_start)
+    msg.description.bounds.stop = list(numpy.array(dvid_start) + a.shape)
     msg.data.data8 = []
     msg.data.data16 = []
     msg.data.data32 = []

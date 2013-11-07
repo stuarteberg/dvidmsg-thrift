@@ -52,5 +52,5 @@ service CutoutService {
 }
 
 service BenchmarkService {
-    ArrayData echoData(1: ArrayData data)
+    Array echoData(1: Array array)
 }
