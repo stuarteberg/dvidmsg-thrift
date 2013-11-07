@@ -3,7 +3,7 @@ import collections
 import numpy
 
 sys.path.append('gen-py')
-from dvidmsg.ttypes import Array, Bounds
+from dvidmsg.ttypes import Array, DatasetDescription, Bounds, ArrayData
 
 conversion_spec = collections.namedtuple('conversion_spec', 'dvid_type thrift_type numpy_type msg_field')
 
@@ -22,10 +22,10 @@ conversion_specs_from_dvid = { spec.dvid_type : spec for spec in conversion_spec
 conversion_specs_from_numpy = { spec.numpy_type : spec for spec in conversion_specs }
 
 def convert_array_from_dvidmsg(msg):
-    _, thrift_dtype, dtype, msg_field = conversion_specs_from_dvid[msg.datatype]
-    msg_data = getattr(msg, msg_field)
+    _, thrift_dtype, dtype, msg_field = conversion_specs_from_dvid[msg.description.datatype]
+    msg_data = getattr(msg.data, msg_field)
     
-    shape = numpy.array(msg.subregion.stop) - msg.subregion.start
+    shape = numpy.array(msg.description.bounds.stop) - msg.description.bounds.start
     assert numpy.prod(shape) == len(msg_data), \
         "Array from server has mismatched length and shape: {}, {}".format( shape, len(msg_data) )
 
@@ -44,18 +44,19 @@ def convert_array_from_dvidmsg(msg):
 
 def convert_array_to_dvidmsg(a, dvid_start):
     msg = Array()
-    msg.subregion = Bounds()
-    msg.subregion.start = dvid_start
-    msg.subregion.stop = numpy.array(dvid_start) + a.shape
-    msg.data8 = []
-    msg.data16 = []
-    msg.data32 = []
-    msg.data64 = []
-    msg.dataDouble = []
+    msg.description = DatasetDescription(bounds=Bounds(), axisNames=[])
+    msg.data = ArrayData()
+    msg.description.bounds.start = dvid_start
+    msg.description.bounds.stop = numpy.array(dvid_start) + a.shape
+    msg.data.data8 = []
+    msg.data.data16 = []
+    msg.data.data32 = []
+    msg.data.data64 = []
+    msg.data.dataDouble = []
 
     dvid_type, thrift_dtype, _, msg_field = conversion_specs_from_numpy[a.dtype.type]
-    msg_data = getattr(msg, msg_field)
-    msg.datatype = dvid_type
+    msg_data = getattr(msg.data, msg_field)
+    msg.description.datatype = dvid_type
 
     # DVID expects fortran order, so transpose before flattening.
     flat_view = a.transpose().flat[:]

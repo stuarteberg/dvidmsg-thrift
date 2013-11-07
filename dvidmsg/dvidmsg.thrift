@@ -32,18 +32,17 @@ struct DatasetDescription {
     3: dtype datatype
 }
 
+union ArrayData {
+    1: list<byte> data8, # Used for i8,u8
+    2: list<i16> data16, # Used for i16, u16
+    3: list<i32> data32, # Used for i32, u32, AND float32
+    4: list<i64> data64, # Used for i64, u64
+    5: list<double> dataDouble # Used for float64
+}
+
 struct Array {
-    1: Bounds subregion,
-    2: AxisNames axisNames,
-    3: dtype datatype,
-    
-    # Only one of the following fields will have any data,
-    #  which determines the dtype of the result.
-    4: optional list<byte> data8, # Used for i8,u8
-    5: optional list<i16> data16, # Used for i16, u16
-    6: optional list<i32> data32, # Used for i32, u32, AND float32
-    7: optional list<i64> data64, # Used for i64, u64
-    8: optional list<double> dataDouble # Used for float64
+    1: DatasetDescription description,
+    2: ArrayData data
 }
 
 service CutoutService {
@@ -52,3 +51,6 @@ service CutoutService {
     Array getCutoutBlock(1: string datasetName, 2: Bounds subregion) # TODO: Add param for dag node uuid
 }
 
+service BenchmarkService {
+    ArrayData echoData(1: ArrayData data)
+}

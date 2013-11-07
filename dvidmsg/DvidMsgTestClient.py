@@ -39,8 +39,8 @@ try:
 
             # Print some of it
             start, stop = numpy.array(description.bounds.start), numpy.array(description.bounds.stop)
-            data_msg = client.getCutoutBlock(name, Bounds(start=start + stop/2, stop=stop))
-            data = conversions.convert_array_from_dvidmsg( data_msg )
+            array_msg = client.getCutoutBlock(name, Bounds(start=start + stop/2, stop=stop))
+            data = conversions.convert_array_from_dvidmsg( array_msg )
             print 'numpy array has dtype:', data.dtype
             print data
 
