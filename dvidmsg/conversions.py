@@ -23,7 +23,7 @@ conversion_specs_from_numpy = { spec.numpy_type : spec for spec in conversion_sp
 
 def convert_array_from_dvidmsg(msg):
     _, thrift_dtype, dtype, msg_field = conversion_specs_from_dvid[msg.description.datatype]
-    msg_data = getattr(msg.data, msg_field)
+    msg_data = getattr( msg.data, msg_field )
     
     shape = numpy.array(msg.description.bounds.stop) - msg.description.bounds.start
     assert numpy.prod(shape) == len(msg_data), \
@@ -50,19 +50,15 @@ def convert_array_to_dvidmsg(a, dvid_start=None):
         dvid_start = (0,) * len(a.shape)
     msg.description.bounds.start = list(dvid_start)
     msg.description.bounds.stop = list(numpy.array(dvid_start) + a.shape)
-    msg.data.data8 = []
-    msg.data.data16 = []
-    msg.data.data32 = []
-    msg.data.data64 = []
-    msg.data.dataDouble = []
 
     dvid_type, thrift_dtype, _, msg_field = conversion_specs_from_numpy[a.dtype.type]
-    msg_data = getattr(msg.data, msg_field)
     msg.description.datatype = dvid_type
 
     # DVID expects fortran order, so transpose before flattening.
     flat_view = a.transpose().flat[:]
-    msg_data[:] = flat_view.view( thrift_dtype )
+    
+    # No need to copy into a list here.  Just provide the view itself.
+    setattr( msg.data, msg_field, flat_view.view( thrift_dtype ) )
 
     return msg
 
