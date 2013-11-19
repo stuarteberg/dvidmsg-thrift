@@ -47,12 +47,33 @@ else ()
         )
 
     ##########################
+    ## Thrift auto-gen Python
+    add_custom_target(gen-thrift-py
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND  ${BUILDEM_ENV_STRING} thrift --gen py -o py dvidmsg.thrift
+      DEPENDS dvidmsg.thrift
+      COMMENT "Autogenerating thrift Python files..."
+      VERBATIM )
+
+    ##########################
+    ## Thrift auto-gen C++
+    add_custom_command(
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT ${CMAKE_SOURCE_DIR}/cpp/gen-cpp/dvidmsg_constants.cpp
+             ${CMAKE_SOURCE_DIR}/cpp/gen-cpp/dvidmsg_types.cpp
+             ${CMAKE_SOURCE_DIR}/cpp/gen-cpp/BenchmarkService.cpp
+      COMMAND ${BUILDEM_ENV_STRING} thrift --gen cpp -o cpp dvidmsg.thrift
+      DEPENDS dvidmsg.thrift
+      COMMENT "Autogenerating thrift C++ files..."
+      VERBATIM )
+
+    ##########################
     ## Serialization Benchmark
-    add_executable(dvidmsg-cpp-benchmark serialization_benchmark.cpp
-                                         timer.cpp
-                                         gen-cpp/BenchmarkService.cpp 
-                                         gen-cpp/dvidmsg_constants.cpp 
-                                         gen-cpp/dvidmsg_types.cpp )
+    add_executable(dvidmsg-cpp-benchmark cpp/serialization_benchmark.cpp
+                                         cpp/timer.cpp
+                                         cpp/gen-cpp/BenchmarkService.cpp 
+                                         cpp/gen-cpp/dvidmsg_constants.cpp 
+                                         cpp/gen-cpp/dvidmsg_types.cpp )
     #add_dependencies(dvidmsg-cpp-benchmark AppDependencies)
     target_link_libraries(dvidmsg-cpp-benchmark ${thrift_LIBRARIES} ${boost_LIBS})
 
@@ -64,20 +85,19 @@ else ()
 
     #################
     ## Example Server
-    add_executable(dvidmsg-cpp-server gen-cpp/BenchmarkService_server.skeleton.cpp 
-                                      gen-cpp/BenchmarkService.cpp 
-                                      gen-cpp/dvidmsg_constants.cpp 
-                                      gen-cpp/dvidmsg_types.cpp)
-    add_dependencies(dvidmsg-cpp-server AppDependencies)
-    target_link_libraries(dvidmsg-cpp-server ${thrift_LIBRARIES} ${boost_LIBS})
-
-    set_target_properties( dvidmsg-cpp-server
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "./bin"
-        COMPILE_FLAGS "-std=c++11"
-    )
+    #add_executable(dvidmsg-cpp-server gen-cpp/BenchmarkService_server.skeleton.cpp 
+    #                                  gen-cpp/BenchmarkService.cpp 
+    #                                  gen-cpp/dvidmsg_constants.cpp 
+    #                                  gen-cpp/dvidmsg_types.cpp)
+    #add_dependencies(dvidmsg-cpp-server AppDependencies)
+    #target_link_libraries(dvidmsg-cpp-server ${thrift_LIBRARIES} ${boost_LIBS})
+#
+#    set_target_properties( dvidmsg-cpp-server
+#        PROPERTIES
+#        RUNTIME_OUTPUT_DIRECTORY "./bin"
+#        COMPILE_FLAGS "-std=c++11"
+#    )
     
     
-
 ############################################################################
 endif()
