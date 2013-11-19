@@ -1,6 +1,6 @@
 import contextlib
 import numpy
-from lazyflow.utility import Timer
+from timer import Timer
 
 from thrift import Thrift
 from thrift.transport import TTransport
