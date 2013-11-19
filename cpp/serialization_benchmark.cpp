@@ -192,8 +192,8 @@ BenchmarkStats run_benchmark( size_t len )
         uint8_t * pBuffer ;
         uint32_t bufferSize ;
         pSendTransport->getBuffer( &pBuffer, &bufferSize ) ;
-        std::cout << std::fixed << std::setprecision(3) ;
-        std::cout << "Serialized data is " << bufferSize / 1.0e6 << " MB" << std::endl ;
+        //std::cout << std::fixed << std::setprecision(3) ;
+        //std::cout << "Serialized data is " << bufferSize / 1.0e6 << " MB" << std::endl ;
         stats.message_size_mb = bufferSize ;
         std::copy(pBuffer, pBuffer + bufferSize, std::back_inserter( serialized_data ) ) ;
     }
@@ -211,7 +211,7 @@ BenchmarkStats run_benchmark( size_t len )
             pArray->read( pProtocol.get() ) ;
         }
         stats.deserialization_seconds = timer.seconds();
-        std::cout << "Deserialization took: " << timer.seconds() << " seconds." << std::endl ;
+        //std::cout << "Deserialization took: " << timer.seconds() << " seconds." << std::endl ;
     }
 
     // Convert: TODO
