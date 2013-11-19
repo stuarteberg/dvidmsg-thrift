@@ -122,14 +122,42 @@ void populate_description( DatasetDescription & description )
     description.bounds.start = boost::assign::list_of(0)(0)(0)(0)(0);
     description.bounds.stop = boost::assign::list_of(0)(0)(0)(0)(0);
     description.axisNames = boost::assign::list_of("t")("x")("y")("z")("c") ;
-    description.datatype = "u32" ;
+    description.datatype = get_type_name<T_>() ;
 }
 
 template <typename T_>
 void populate_data( ArrayData & data, std::vector<T_> const & vec )
 {
-    // FIXME
-    std::copy( vec.begin(), vec.end(), std::back_inserter(data.data32) );
+    if ( boost::is_same<T_, float>::value )
+    {
+        // Special case for float:
+        // Reinterpret as int and populate the int32 data field
+        BOOST_FOREACH( float const & x, vec )
+        {
+            // FIXME: Technically, type-punning like this violates the C++ standard
+            data.data32.push_back( reinterpret_cast<int32_t const &>( x ) ) ;
+        }
+    }
+    else if ( boost::is_same<T_, double>::value )
+    {
+        std::copy( vec.begin(), vec.end(), std::back_inserter(data.dataDouble) );
+    }
+    else if ( sizeof(T_) == sizeof(uint8_t) )
+    {
+        std::copy( vec.begin(), vec.end(), std::back_inserter(data.data8) );
+    }
+    else if ( sizeof(T_) == sizeof(uint16_t) )
+    {
+        std::copy( vec.begin(), vec.end(), std::back_inserter(data.data16) );
+    }
+    else if ( sizeof(T_) == sizeof(uint32_t) )
+    {
+        std::copy( vec.begin(), vec.end(), std::back_inserter(data.data32) );
+    }
+    else if ( sizeof(T_) == sizeof(uint64_t) )
+    {
+        std::copy( vec.begin(), vec.end(), std::back_inserter(data.data64) );
+    }
 }
 
 template <typename T_>
@@ -229,7 +257,7 @@ void print_stat_header()
               << "serialization time,"
               << "deserialization time,"
               << "array creation time"
-              << "\n" ;
+              << std::endl ;
 }
 
 void print_stats( BenchmarkStats const & stats )
@@ -241,7 +269,7 @@ void print_stats( BenchmarkStats const & stats )
               << stats.serialization_seconds << ','
               << stats.deserialization_seconds << ','
               << stats.array_creation_seconds
-              << '\n' ;
+              << std::endl ;
 }
 
 // ******************************************************************
@@ -270,10 +298,11 @@ int main()
         print_stats( run_benchmark<uint32_t>( size ) ) ;
         print_stats( run_benchmark<int32_t>( size ) ) ;
 
+        print_stats( run_benchmark<float>( size ) ) ;
+
         print_stats( run_benchmark<uint64_t>( size ) ) ;
         print_stats( run_benchmark<int64_t>( size ) ) ;
 
-        print_stats( run_benchmark<float>( size ) ) ;
         print_stats( run_benchmark<double>( size ) ) ;
     }
 
