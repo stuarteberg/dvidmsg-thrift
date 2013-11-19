@@ -7,9 +7,9 @@ $ cmake -DBUILDEM_DIR=/path/to/bpd ..
 CPP BENCHMARK
 -------------
 # Make CPP serialization benchmark (including auto-gen thrift sources)
-$ make dvid-cpp-benchmark
+$ make dvidmsg-cpp-benchmark
 # Run benchmark
-$ ./bin/dvid-cpp-benchmark
+$ ./bin/dvidmsg-cpp-benchmark
 
 PYTHON BENCHMARK
 ----------------
