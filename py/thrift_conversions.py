@@ -1,9 +1,8 @@
-import sys
 import collections
 import numpy
 
-sys.path.append('gen-py')
-from dvidmsg.ttypes import Array, DatasetDescription, Bounds, ArrayData
+import genpy.dvidmsg
+from genpy.dvidmsg.ttypes import Array, DatasetDescription, Bounds, ArrayData
 
 conversion_spec = collections.namedtuple('conversion_spec', 'dvid_type thrift_type numpy_type msg_field')
 

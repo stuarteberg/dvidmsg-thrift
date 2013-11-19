@@ -1,8 +1,3 @@
-import os
-import sys
-gen_py_dir = os.path.join( os.path.split(__file__)[0], 'gen-py' )
-sys.path.append( gen_py_dir )
-
 import contextlib
 import numpy
 from lazyflow.utility import Timer
@@ -11,7 +6,7 @@ from thrift import Thrift
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 
-from dvidmsg.ttypes import Array
+from genpy.dvidmsg.ttypes import Array
 import thrift_conversions
 
 class BenchmarkStats(object):
@@ -36,7 +31,7 @@ def random_data( dtype, shape ):
 def run_benchmark( dtype, shape ):
     try:
         stats = BenchmarkStats()
-        stats.type_name = conversions.conversion_specs_from_numpy[ dtype ].dvid_type
+        stats.type_name = thrift_conversions.conversion_specs_from_numpy[ dtype ].dvid_type
     
         # Prepare array data
         send_data = random_data( dtype, shape )
@@ -44,7 +39,7 @@ def run_benchmark( dtype, shape ):
         
         # Format into message
         with Timer() as timer:
-            send_msg = conversions.convert_array_to_dvidmsg( send_data )
+            send_msg = thrift_conversions.convert_array_to_dvidmsg( send_data )
         stats.message_creation_seconds = timer.seconds()
     
         # Serialize it
@@ -75,7 +70,7 @@ def run_benchmark( dtype, shape ):
     
         # Convert back to ndarray
         with Timer() as timer:
-            rcv_data = conversions.convert_array_from_dvidmsg( rcv_msg )
+            rcv_data = thrift_conversions.convert_array_from_dvidmsg( rcv_msg )
         stats.array_creation_seconds = timer.seconds()
         #print "Converting message structure to ndarray took {} seconds".format( timer.seconds() )
     
