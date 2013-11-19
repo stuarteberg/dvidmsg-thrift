@@ -1,0 +1,19 @@
+SETUP
+-----
+$ mkdir build
+$ cd build
+$ cmake -DBUILDEM_DIR=/path/to/bpd ..
+
+CPP BENCHMARK
+-------------
+# Make CPP serialization benchmark (including auto-gen thrift sources)
+$ make dvid-cpp-benchmark
+# Run benchmark
+$ ./bin/dvid-cpp-benchmark
+
+PYTHON BENCHMARK
+----------------
+# Autogenerate Python thrift classes
+$ make gen-thrift-py
+# Run benchmark
+$ /path/to/bpd/bin/python ../py/serialization_benchmark.py
