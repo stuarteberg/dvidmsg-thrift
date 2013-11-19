@@ -16,7 +16,7 @@ conversion_specs = [ conversion_spec('i8',      numpy.int8,  numpy.int8,    'dat
                      conversion_spec('i64',     numpy.int64, numpy.int64,   'data64'),
                      conversion_spec('u64',     numpy.int64, numpy.uint64,  'data64'),
                      conversion_spec('float32', numpy.int32, numpy.float32, 'data32'),
-                     conversion_spec('float64', numpy.int64, numpy.float64, 'dataDouble') ]
+                     conversion_spec('float64', numpy.float64, numpy.float64, 'dataDouble') ]
 
 conversion_specs_from_dvid = { spec.dvid_type : spec for spec in conversion_specs }
 conversion_specs_from_numpy = { spec.numpy_type : spec for spec in conversion_specs }
@@ -29,7 +29,7 @@ def convert_array_from_dvidmsg(msg):
     assert numpy.prod(shape) == len(msg_data), \
         "Array from server has mismatched length and shape: {}, {}".format( shape, len(msg_data) )
 
-    # Use Fortran order under the hood, since that's the order that DVID gives us.
+    # Use Fortran order, since that's the DVID convention
     result = numpy.ndarray( shape, dtype=dtype, order='F' )
 
     # Use ndarray.view() to reinterpret the type of our 
@@ -54,7 +54,8 @@ def convert_array_to_dvidmsg(a, dvid_start=None):
     dvid_type, thrift_dtype, _, msg_field = conversion_specs_from_numpy[a.dtype.type]
     msg.description.datatype = dvid_type
 
-    # DVID expects fortran order, so transpose before flattening.
+    # We assume this array is provided in fortran order, because that's the dvid convention.
+    # But we need to transmit in C-order, so transpose() to get correct iteration order.
     flat_view = a.transpose().flat[:]
     
     # No need to copy into a list here.  Just provide the view itself.
