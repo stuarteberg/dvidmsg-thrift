@@ -222,7 +222,7 @@ BenchmarkStats run_benchmark( size_t len )
         pSendTransport->getBuffer( &pBuffer, &bufferSize ) ;
         //std::cout << std::fixed << std::setprecision(3) ;
         //std::cout << "Serialized data is " << bufferSize / 1.0e6 << " MB" << std::endl ;
-        stats.message_size_mb = bufferSize ;
+        stats.message_size_mb = bufferSize / 1.0e6 ;
         std::copy(pBuffer, pBuffer + bufferSize, std::back_inserter( serialized_data ) ) ;
     }
 
