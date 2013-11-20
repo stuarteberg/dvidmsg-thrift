@@ -169,6 +169,48 @@ ArrayPtr convert_to_thrift( std::vector<T_> const & vec )
     return pResult ;
 }
 
+template <typename T_>
+boost::shared_ptr<std::vector<T_> > convert_from_thrift( ArrayData const & dataFields )
+{
+    // Instead of reading the array data into some image, we'll just copy it into a big vector.
+    // This should be roughly the same as a malloc + memcpy, but this function is here for completeness.
+
+    boost::shared_ptr<std::vector<T_> > pVec( new std::vector<T_>() ) ;
+    std::vector<T_> & vec = *pVec ;
+
+    if ( boost::is_same<T_, float>::value )
+    {
+        // Special case for float:
+        // Reinterpret as int and populate the int32 data field
+        BOOST_FOREACH( int32_t const & x, dataFields.data32 )
+        {
+            // FIXME: Technically, type-punning like this violates the C++ standard
+            vec.push_back( reinterpret_cast<float const &>( x ) ) ;
+        }
+    }
+    else if ( boost::is_same<T_, double>::value )
+    {
+        std::copy( dataFields.dataDouble.begin(), dataFields.dataDouble.end(), std::back_inserter(vec) );
+    }
+    else if ( sizeof(T_) == sizeof(uint8_t) )
+    {
+        std::copy( dataFields.data8.begin(), dataFields.data8.end(), std::back_inserter(vec) );
+    }
+    else if ( sizeof(T_) == sizeof(uint16_t) )
+    {
+        std::copy( dataFields.data16.begin(), dataFields.data16.end(), std::back_inserter(vec) );
+    }
+    else if ( sizeof(T_) == sizeof(uint32_t) )
+    {
+        std::copy( dataFields.data32.begin(), dataFields.data32.end(), std::back_inserter(vec) );
+    }
+    else if ( sizeof(T_) == sizeof(uint64_t) )
+    {
+        std::copy( dataFields.data64.begin(), dataFields.data64.end(), std::back_inserter(vec) );
+    }
+    return pVec ;
+}
+
 struct BenchmarkStats
 {
     std::string type_name ;
@@ -240,10 +282,14 @@ BenchmarkStats run_benchmark( size_t len )
         }
         stats.deserialization_seconds = timer.seconds();
         //std::cout << "Deserialization took: " << timer.seconds() << " seconds." << std::endl ;
-    }
 
-    // Convert: TODO
-    stats.array_creation_seconds = -1.0 ;
+        Timer conversion_timer ;
+        {
+            Timer::Token token(conversion_timer) ;
+            boost::shared_ptr<std::vector<T_> > pVec = convert_from_thrift<T_>( pArray->data ) ;
+        }
+        stats.array_creation_seconds = conversion_timer.seconds() ;
+    }
 
     return stats;
 }
