@@ -63,7 +63,7 @@ else ()
              ${CMAKE_SOURCE_DIR}/cpp/gen-cpp/dvidmsg_types.cpp
              ${CMAKE_SOURCE_DIR}/cpp/gen-cpp/BenchmarkService.cpp
       COMMAND ${BUILDEM_ENV_STRING} thrift --gen cpp -o cpp dvidmsg.thrift
-      DEPENDS dvidmsg.thrift
+      DEPENDS ${boost_NAME} ${thrift_NAME} dvidmsg.thrift
       COMMENT "Autogenerating thrift C++ files..."
       VERBATIM )
 
